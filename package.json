@@ -1,0 +1,27 @@
+{
+    "name": "leaveManage",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+        "@cap-js/hana": "^1",
+        "@sap/cds": "^8",
+        "axios": "^1.7.5",
+        "express": "^4",
+        "nodemailer": "^6.9.14"
+    },
+    "devDependencies": {
+        "@cap-js/cds-types": "^0.6",
+        "@cap-js/sqlite": "^1",
+        "@sap/cds-dk": "^8",
+        "rimraf": "^3.0.2"
+    },
+    "scripts": {
+        "start": "cds-serve",
+        "undeploy": "cf undeploy leaveManage --delete-services --delete-service-keys --delete-service-brokers",
+        "build": "rimraf resources mta_archives && mbt build --mtar archive",
+        "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    }
+}

@@ -1,0 +1,41 @@
+<mvc:View 
+    controllerName="workflowuimodule.controller.LeaveRequest"
+    xmlns:mvc="sap.ui.core.mvc" 
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Page id="page" title="Leave Request">
+        <content>
+            <VBox alignContent="Center" justifyContent="Center" width="100%" height="100%">
+                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="2" labelSpanL="2" labelSpanM="2" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="1" emptySpanL="1" emptySpanM="1" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
+                    <f:content>
+                        <Title text="Apply Leave" class="TitleCenter" />
+                        <Label text="Leave Type" />
+                        <ComboBox id="leaveTypeId">
+                            <core:Item text="Casual Leave" key="CL" />
+                            <core:Item text="Sick Leave" key="SL" />
+                            <core:Item text="Earned Leave" key="EL" />
+                            <core:Item text="Unpaid Leave" key="UPL" />
+                            <core:Item text="Half Leave" key="HL" />
+                            <core:Item text="Adjustment Leave" key="AL" />
+                        </ComboBox>
+                        <Label text="From Date" />
+                        <DatePicker id="fromDateId" displayFormat="dd-MMM-yyyy" valueFormat="yyyy-MM-dd" />
+                        <Label text="To Date" />
+                        <DatePicker id="toDateId" displayFormat="dd-MMM-yyyy" valueFormat="yyyy-MM-dd" />
+                        <Label text="Reason" />
+                        <Input id="reasonId" placeholder="Enter reason for leave" />
+                    </f:content>
+                </f:SimpleForm>
+            </VBox>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+                <Button text="Apply Leave" press="onLeaveApply" width="200px" />
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>

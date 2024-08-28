@@ -1,0 +1,143 @@
+_schema-version: 3.3.0
+ID: leaveManage
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: leaveManage-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: leaveManage-db
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: leaveManage-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: leaveManage-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: leaveManage-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: leaveManage-destination-service
+    parameters:
+      content-target: true
+  - name: leaveManage_html_repo_host
+    parameters:
+      service-key:
+        name: leaveManage_html_repo_host-key
+  - name: uaa_leaveManage
+    parameters:
+      service-key:
+        name: uaa_leaveManage-key
+  parameters:
+    content:
+      subaccount:
+        destinations:
+        - Name: leaverequest_leaveManage_html_repo_host
+          ServiceInstanceName: leaveManage-html5-app-host-service
+          ServiceKeyName: leaveManage_html_repo_host-key
+          sap.cloud.service: leaverequest
+        - Authentication: OAuth2UserTokenExchange
+          Name: leaverequest_uaa_leaveManage
+          ServiceInstanceName: leaveManage-xsuaa-service
+          ServiceKeyName: uaa_leaveManage-key
+          sap.cloud.service: leaverequest
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: leaveManage-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: leaveManage_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - workflowuimodule.zip
+      name: workflowuimodule
+      target-path: resources/
+- name: workflowuimodule
+  type: html5
+  path: workflow-ui-module
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: workflow-module
+  type: com.sap.application.content
+  path: workflow-module
+  requires:
+  - name: sap_processautomation
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          deployUsageScenario: workflow
+        name: spa-workflow-service-key
+resources:
+- name: leaveManage-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: leaveManage-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        subaccount:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: leaveManage-destination-service
+    service-plan: lite
+- name: leaveManage_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: leaveManage-html5-app-host-service
+    service-plan: app-host
+- name: uaa_leaveManage
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: leaveManage-xsuaa-service
+    service-plan: application
+- name: sap_processautomation
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: process-automation-service
+    service-plan: standard
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
